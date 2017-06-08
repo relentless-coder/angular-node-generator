@@ -71,6 +71,40 @@ const dummySchema = new Schema({
 
 export default mongoose.model('Dummy', dummySchema)" >> server/models/dummy.model.js
 
+echo "
+import {Router} from 'express';
+import Dummy from '../models/dummy.model';
+
+const router = new Router();
+
+router.get('/', auth.isAuthenticated(), (req, res)=>{
+	Dummy.find({}, (err, foundDummy)=>{
+		err ? res.status(500).json({message: err}) : res.status(200).json({data: foundDummy})
+	})
+})
+
+router.post('/', auth.isAuthenticated(), (req, res)=>{
+	Dummy.create(req.body, (err, createdDummy)=>{
+		err ? res.status(500).json({message: err}) : res.status(200).json({message: 'Dummy created successfully', data: createdDummy})
+	})
+	
+})
+
+router.put('/:id', auth.isAuthenticated(), (req, res)=>{
+	Dummy.update(req.params.id, req.body, (err, updatedDummy)=>{
+		err ? res.status(500).json({message: err}) : res.status(200).json({message: 'Dummy updated successfully'})
+	})
+
+})
+
+router.delete('/:id', auth.isAuthenticated(), (req, res)=>{
+	Dummy.remove({_id: req.params.id}, (err, removedDummy)=>{
+		err ? res.status(500).json({message: err}) : res.status(200).json({message: 'Dummy removed successfully'})
+	})
+})
+
+export default {router} " >> server/routes/dummy.route.js
+
 json -I -f package.json -e 'this.scripts = {
 "build-js": "webpack --config webpack.config.js",
 "test": "node node_modules/.bin/mocha --require ./server/test/testHelper.js ./server/test  --repoert spec --compilers js:babel-core/register",
